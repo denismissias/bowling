@@ -4,36 +4,54 @@ namespace bowling.domain
 {
     public class Game
     {
-        private readonly int[] throws = new int[21];
-        private int currentThrow;
+        private bool isFirstThrow = true;
+        private readonly Scorer scorer = new Scorer();
+        
+        public int Score
+        {
+            get
+            {
+                return GetScoreForFrame(CurrentFrame);
+            }
+        }
 
-        public int Score { get; set; }
+        public int CurrentFrame { get; private set; }
 
         public void Add(int pins)
         {
-            throws[currentThrow++] = pins;
-            Score += pins;
+            scorer.AddThrow(pins);
+            AdjustCurrentFrame(pins);
         }
 
-        public int ScoreForFrame(int theFrame)
+        private void AdjustCurrentFrame(int pins)
         {
-            int ball = 0;
-            int score = 0;
+            if (LastBallInFrame(pins))
+                AdvanceFrame();
+            else
+                isFirstThrow = false;
+        }
 
-            for (int currentFrame = 0; currentFrame < theFrame; currentFrame++)
-            {
-                int firstThrow = throws[ball++];
-                int secondThrow = throws[ball++];
+        private bool LastBallInFrame(int pins)
+        {
+            return Strike(pins) || (!isFirstThrow);
+        }
 
-                int frameScore = firstThrow + secondThrow;
+        private bool Strike(int pins)
+        {
+            return isFirstThrow && pins == 10;
+        }
 
-                if (frameScore == 10)
-                    score += frameScore + throws[ball++];
-                else
-                    score += frameScore;
-            }
+        private void AdvanceFrame()
+        {
+            CurrentFrame++;
 
-            return score;
+            if (CurrentFrame > 10)
+                CurrentFrame = 10;
+        }
+
+        public int GetScoreForFrame(int theFrame)
+        {
+            return scorer.GetScoreForFrame(theFrame);
         }
     }
 }

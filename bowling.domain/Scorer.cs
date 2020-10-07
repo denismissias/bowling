@@ -1,0 +1,80 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace bowling.domain
+{
+    public class Scorer
+    {
+        private int ball;
+        private readonly int[] throws = new int[21];
+        private int currentThrow;
+
+        private int NextBallForSpare
+        {
+            get
+            {
+                return throws[ball + 2];
+            }
+
+        }
+
+        private int NextTwoBallsForStrike
+        {
+            get
+            {
+                return throws[ball + 1] + throws[ball + 2];
+            }
+        }
+
+        public int TwoBallsInFrame
+        {
+            get
+            {
+                return throws[ball] + throws[ball + 1];
+            }
+        }
+
+        public void AddThrow(int pins)
+        {
+            throws[currentThrow++] = pins;
+        }
+
+        public int GetScoreForFrame(int theFrame)
+        {
+            ball = 0;
+            int score = 0;
+
+            for (int currentFrame = 0; currentFrame < theFrame; currentFrame++)
+            {
+                if (Strike())
+                {
+                    score += 10 + NextTwoBallsForStrike;
+                    ball++;
+                }
+                else if (Spare())
+                {
+                    score += 10 + NextBallForSpare;
+                    ball += 2;
+                }
+                else
+                {
+                    score += TwoBallsInFrame;
+                    ball += 2;
+                }
+            }
+
+            return score;
+        }
+
+        private bool Strike()
+        {
+            return throws[ball] == 10;
+        }
+
+        private bool Spare()
+        {
+            return throws[ball] + throws[ball + 1] == 10;
+        }
+    }
+}
